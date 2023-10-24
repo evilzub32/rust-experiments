@@ -3,10 +3,7 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use sdl2::gfx::primitives::DrawRenderer;
-
 use crate::model::gameobjects::GameObject;
-
 
 pub struct Renderer {
     pub screen_width: u32,
@@ -36,8 +33,9 @@ impl Renderer {
     pub fn render(&mut self, player: &GameObject) {
         self.canvas.set_draw_color(Color::RGB(0,0,0));
         self.canvas.clear();
-        self.canvas.circle(player.x_i16(), player.y_i16(), 10, Color::RGB(255,255,255)).unwrap();
-        // self.canvas.dr
+
+        player.render(&mut self.canvas);
+
         self.canvas.present();
     }
 }

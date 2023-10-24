@@ -28,10 +28,6 @@ fn main() {
                     }
                     println!("Rotation angle: {}", player.angle_deg);
                 },
-                // Event::MouseMotion { x, y, xrel, yrel, .. } => {
-                //     // println!("Mouse: {},{}", x, y);
-                //     // println!("Relative: {},{}", xrel, yrel);
-                // },
                 _ => {}
             }
         }
