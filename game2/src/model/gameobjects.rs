@@ -36,5 +36,13 @@ impl GameObject {
             self.y as i16,
             10,
             Color::YELLOW).unwrap();
+
+        canvas.line(
+            self.x as i16,
+            self.y as i16,
+            self.x as i16,
+            (self.y + 20) as i16,
+            Color::GREEN
+        ).unwrap();
     }
 }
