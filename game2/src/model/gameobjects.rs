@@ -61,13 +61,21 @@ pub struct GameObject {
 impl GameObject {
 
     // if value exceeds boundary, wrap it to the "left" side of the range and the other way round
-    fn wrap_around(n: i16, boundary: i16) -> i16 {
-        if n > boundary {
-            return n - boundary
-        } else if n < 0 {
-            return boundary + n
+    fn wrap_around(&mut self) {
+        let i16_screen_width = self.screen_width as i16;
+        let i16_screen_height = self.screen_height as i16;
+
+        if self.x > i16_screen_width {
+            self.x = self.x - i16_screen_width;
+        } else if self.x < 0 {
+            self.x = i16_screen_width + self.x;
         }
-        n
+
+        if self.y > i16_screen_height {
+            self.y = self.y - i16_screen_height;
+        } else if self.y < 0 {
+            self.y = i16_screen_height + self.y;
+        }
     }
 
     // static new method as "constructor"
@@ -122,8 +130,7 @@ impl GameObject {
         self.x += self.velocity_vector.x.round() as i16;
         self.y += self.velocity_vector.y.round() as i16;
 
-        self.x = GameObject::wrap_around(self.x, self.screen_width as i16);
-        self.y = GameObject::wrap_around(self.y, self.screen_height as i16);
+        self.wrap_around();
     }
 
     pub fn render(&self, canvas: &mut Canvas<Window>) {
