@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use model::gameobjects::GameObject;
+use model::gameobjects::{GameObject, Rotation};
 use sdl2::{event::Event, keyboard::Keycode};
 
 mod view;
@@ -21,17 +21,7 @@ fn main() {
         (playfield.screen_height / 2) as i16);
 
     while running {
-
-        // FIXME: Use states like this:
-        // const Uint8* keystates = SDL_GetKeyboardState(NULL);
-
-        // ...
-
-        // if(keystates[SDL_SCANCODE_LEFT])
-        //     player.moving = player.left;
-        // else if(keystates[SDL_SCANCODE_RIGHT])
-        //     player.moving = player.right;
-
+        // Events will arrive erraticly so use state in gameobject for smooth handling
         for event in event_queue.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -39,14 +29,16 @@ fn main() {
                 },
                 Event::KeyDown { keycode: Some(keycode), .. } => {
                     match keycode {
-                        Keycode::Left => player.rotate_counterclockwise(),
-                        Keycode::Right => player.rotate_clockwise(),
+                        Keycode::Left => player.rotation = Rotation::Counterclockwise,
+                        Keycode::Right => player.rotation = Rotation::Clockwise,
                         Keycode::Up => player.increase_thrust(),
                         _ => {}
                     }
                 },
                 Event::KeyUp { keycode: Some(keycode), ..} => {
                     match keycode {
+                        Keycode::Left => player.rotation = Rotation::None,
+                        Keycode::Right => player.rotation = Rotation::None,
                         Keycode::Up => {
                             player.decrease_thrust();
                         },

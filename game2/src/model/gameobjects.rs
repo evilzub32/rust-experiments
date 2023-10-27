@@ -1,9 +1,15 @@
 use sdl2::{render::Canvas, video::Window, pixels::Color};
 use sdl2::gfx::primitives::DrawRenderer;
 
-const TURNING_SPEED: u32 = 12;
+const TURNING_SPEED: u32 = 8;
 const THRUST: f32 = 0.2;
 const MAX_SPEED: f32 = 8.;
+
+pub enum Rotation {
+    None,
+    Clockwise,
+    Counterclockwise
+}
 
 pub struct Vector2 {
     pub x: f32,
@@ -52,6 +58,7 @@ pub struct GameObject {
     pub y: i16,
 
     pub angle_deg: i16,
+    pub rotation: Rotation,
 
     thrust: f32,
     thrust_vector: Vector2,
@@ -86,23 +93,10 @@ impl GameObject {
             x: x,
             y: y,
             angle_deg: 0,
+            rotation: Rotation::None,
             thrust: 0.,
             thrust_vector: Vector2::new(),
             velocity_vector: Vector2::new()
-        }
-    }
-
-    pub fn rotate_clockwise(&mut self) {
-        self.angle_deg += TURNING_SPEED as i16;
-        if self.angle_deg >= 360 {
-            self.angle_deg = self.angle_deg - 360;
-        }
-    }
-
-    pub fn rotate_counterclockwise(&mut self) {
-        self.angle_deg -= TURNING_SPEED as i16;
-        if self.angle_deg < 0 {
-            self.angle_deg = 360 + self.angle_deg;
         }
     }
 
@@ -115,6 +109,21 @@ impl GameObject {
     }
 
     pub fn update(&mut self) {
+        match self.rotation {
+            Rotation::Clockwise => {
+                self.angle_deg += TURNING_SPEED as i16;
+                if self.angle_deg >= 360 {
+                    self.angle_deg = self.angle_deg - 360;
+                }
+            },
+            Rotation::Counterclockwise => {
+                self.angle_deg -= TURNING_SPEED as i16;
+                if self.angle_deg < 0 {
+                    self.angle_deg = 360 + self.angle_deg;
+                }
+            },
+            _ => {}
+        }
         self.thrust_vector = Vector2{x: 0., y: self.thrust as f32}.rotate(self.angle_deg);
 
         self.velocity_vector = self.velocity_vector.add(&self.thrust_vector);
