@@ -2,11 +2,14 @@ use sdl2::{render::Canvas, video::Window, pixels::Color};
 use sdl2::gfx::primitives::DrawRenderer;
 
 const TURNING_SPEED: u32 = 8;
-const THRUST: f32 = 0.2;
+const THRUST: f32 = -0.2;
 const MAX_SPEED: f32 = 8.;
 
-const SHIP_POLY_X: [i16; 3] = [ 0, 15, -15 ];
-const SHIP_POLY_Y: [i16; 3] = [ -20, 20, 20 ];
+const SHIP_POLY: [Vector2; 3] = [
+    Vector2{x: 0., y: -20.},
+    Vector2{x: 15., y: 20.},
+    Vector2{x: -15., y: 20.},
+];
 
 pub enum Rotation {
     None,
@@ -135,7 +138,6 @@ impl GameObject {
         let speed = self.velocity_vector.magnitude();
         if speed > MAX_SPEED {
             let limiter = MAX_SPEED / speed;
-            println!("[{},{}] Limiter: {}, Speed: {}", self.velocity_vector.x, self.velocity_vector.y, limiter, speed);
             self.velocity_vector = self.velocity_vector.multiply(limiter);
         }
 
@@ -148,10 +150,16 @@ impl GameObject {
     pub fn render(&self, canvas: &mut Canvas<Window>) {
         // SDL2 methods with aa_...: means "anti alias" :)
 
-        // hmm... how to do this correctly? array handling in Rust...
-        let poly_x: [i16; 3] = [ self.x + SHIP_POLY_X[0], self.x + SHIP_POLY_X[1], self.x + SHIP_POLY_X[2] ];
-        let poly_y: [i16; 3] = [ self.y + SHIP_POLY_Y[0], self.y + SHIP_POLY_Y[1], self.y + SHIP_POLY_Y[2] ];
-        canvas.aa_polygon(&poly_x, &poly_y, Color::YELLOW).unwrap();
+        let mut ship_poly_x: [i16; 3] = [0; 3];
+        let mut ship_poly_y: [i16; 3] = [0; 3];
+
+        for n in 0..3 {
+            let point = SHIP_POLY[n].rotate(self.angle_deg);
+            ship_poly_x[n] = point.x.round() as i16 + self.x;
+            ship_poly_y[n] = point.y.round() as i16 + self.y;
+        }
+
+        canvas.aa_polygon(&ship_poly_x, &ship_poly_y, Color::YELLOW).unwrap();
 
         // paint thrust vector in green
         let indicator = Vector2 { x: 0., y: 1.}.rotate(self.angle_deg);
