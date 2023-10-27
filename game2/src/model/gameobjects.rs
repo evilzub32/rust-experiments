@@ -28,6 +28,7 @@ impl Vector2 {
     }
 
     pub fn rotate(&self, angle_deg: i16) -> Vector2 {
+        // first, convert to rad
         let angle = angle_deg as f32;
         let angle_rad = angle.to_radians();
         Vector2 {
@@ -53,6 +54,11 @@ impl Vector2 {
     }
 }
 
+#[derive(Clone, Copy)]
+pub struct Point {
+    pub x: i16,
+    pub y: i16,
+}
 pub struct GameObject {
     // choosing u32 for no particular reason
 
@@ -60,8 +66,7 @@ pub struct GameObject {
     screen_width: u32,
     screen_height: u32,
 
-    pub x: i16,
-    pub y: i16,
+    pub position: Point,
 
     pub angle_deg: i16,
     pub rotation: Rotation,
@@ -71,33 +76,42 @@ pub struct GameObject {
     velocity_vector: Vector2,
 }
 
-impl GameObject {
+pub trait MovingObject {
+    fn get_screen_width(&self) -> u32;
+    fn get_screen_height(&self) -> u32;
+    fn get_position(&self) -> &Point;
+    fn set_position(&mut self, position: &mut Point);
 
     // if value exceeds boundary, wrap it to the "left" side of the range and the other way round
     fn wrap_around(&mut self) {
-        let i16_screen_width = self.screen_width as i16;
-        let i16_screen_height = self.screen_height as i16;
+        let i16_screen_width = self.get_screen_width() as i16;
+        let i16_screen_height = self.get_screen_height() as i16;
 
-        if self.x > i16_screen_width {
-            self.x = self.x - i16_screen_width;
-        } else if self.x < 0 {
-            self.x = i16_screen_width + self.x;
+        let mut pos = self.get_position().clone();
+        if pos.x > i16_screen_width {
+            pos.x = pos.x - i16_screen_width;
+        } else if pos.x < 0 {
+            pos.x = i16_screen_width + pos.x;
         }
 
-        if self.y > i16_screen_height {
-            self.y = self.y - i16_screen_height;
-        } else if self.y < 0 {
-            self.y = i16_screen_height + self.y;
+        if pos.y > i16_screen_height {
+            pos.y = pos.y - i16_screen_height;
+        } else if pos.y < 0 {
+            pos.y = i16_screen_height + pos.y;
         }
+
+        self.set_position(&mut pos);
     }
+}
+
+impl GameObject {
 
     // static new method as "constructor"
     pub fn new(screen_width: u32, screen_height: u32, x: i16, y: i16) -> GameObject {
         GameObject {
             screen_width: screen_width,
             screen_height: screen_height,
-            x: x,
-            y: y,
+            position: Point{x: x, y: y},
             angle_deg: 0,
             rotation: Rotation::None,
             thrust: 0.,
@@ -141,8 +155,10 @@ impl GameObject {
             self.velocity_vector = self.velocity_vector.multiply(limiter);
         }
 
-        self.x += self.velocity_vector.x.round() as i16;
-        self.y += self.velocity_vector.y.round() as i16;
+        let mut pos = self.position;
+        pos.x += self.velocity_vector.x.round() as i16;
+        pos.y += self.velocity_vector.y.round() as i16;
+        self.set_position(&mut pos);
 
         self.wrap_around();
     }
@@ -150,13 +166,15 @@ impl GameObject {
     pub fn render(&self, canvas: &mut Canvas<Window>) {
         // SDL2 methods with aa_...: means "anti alias" :)
 
+        let pos = self.get_position();
+
         let mut ship_poly_x: [i16; 3] = [0; 3];
         let mut ship_poly_y: [i16; 3] = [0; 3];
 
         for n in 0..3 {
             let point = SHIP_POLY[n].rotate(self.angle_deg);
-            ship_poly_x[n] = point.x.round() as i16 + self.x;
-            ship_poly_y[n] = point.y.round() as i16 + self.y;
+            ship_poly_x[n] = point.x.round() as i16 + pos.x;
+            ship_poly_y[n] = point.y.round() as i16 + pos.y;
         }
 
         canvas.aa_polygon(&ship_poly_x, &ship_poly_y, Color::YELLOW).unwrap();
@@ -165,13 +183,31 @@ impl GameObject {
         let indicator = Vector2 { x: 0., y: 1.}.rotate(self.angle_deg);
 
         canvas.aa_line(
-            self.x as i16,
-            self.y as i16,
+            pos.x as i16,
+            pos.y as i16,
             // multiply with scaling factor to make it visible
-            self.x as i16 + (indicator.x * 20.) as i16,
-            self.y as i16 + (indicator.y * 20.) as i16,
+            pos.x as i16 + (indicator.x * 20.) as i16,
+            pos.y as i16 + (indicator.y * 20.) as i16,
             Color::GREEN
         ).unwrap();
     }
 
+}
+
+impl MovingObject for GameObject {
+    fn get_screen_width(&self) -> u32 {
+        self.screen_width
+    }
+
+    fn get_screen_height(&self) -> u32 {
+        self.screen_height
+    }
+
+    fn get_position(&self) -> &Point {
+        &self.position
+    }
+
+    fn set_position(& mut self, position: &mut Point) {
+        self.position = *position;
+    }
 }
