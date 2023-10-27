@@ -5,6 +5,9 @@ const TURNING_SPEED: u32 = 8;
 const THRUST: f32 = 0.2;
 const MAX_SPEED: f32 = 8.;
 
+const SHIP_POLY_X: [i16; 3] = [ 0, 15, -15 ];
+const SHIP_POLY_Y: [i16; 3] = [ -20, 20, 20 ];
+
 pub enum Rotation {
     None,
     Clockwise,
@@ -143,17 +146,17 @@ impl GameObject {
     }
 
     pub fn render(&self, canvas: &mut Canvas<Window>) {
-        // Circle around center serves as symbolic "spaceship"
-        canvas.circle(
-            self.x as i16,
-            self.y as i16,
-            10,
-            Color::YELLOW).unwrap();
+        // SDL2 methods with aa_...: means "anti alias" :)
+
+        // hmm... how to do this correctly? array handling in Rust...
+        let poly_x: [i16; 3] = [ self.x + SHIP_POLY_X[0], self.x + SHIP_POLY_X[1], self.x + SHIP_POLY_X[2] ];
+        let poly_y: [i16; 3] = [ self.y + SHIP_POLY_Y[0], self.y + SHIP_POLY_Y[1], self.y + SHIP_POLY_Y[2] ];
+        canvas.aa_polygon(&poly_x, &poly_y, Color::YELLOW).unwrap();
 
         // paint thrust vector in green
         let indicator = Vector2 { x: 0., y: 1.}.rotate(self.angle_deg);
 
-        canvas.line(
+        canvas.aa_line(
             self.x as i16,
             self.y as i16,
             // multiply with scaling factor to make it visible

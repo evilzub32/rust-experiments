@@ -32,6 +32,10 @@ fn main() {
                         Keycode::Left => player.rotation = Rotation::Counterclockwise,
                         Keycode::Right => player.rotation = Rotation::Clockwise,
                         Keycode::Up => player.increase_thrust(),
+
+                        Keycode::Escape => {
+                            running = false;
+                        },
                         _ => {}
                     }
                 },
