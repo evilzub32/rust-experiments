@@ -1,3 +1,3 @@
 pub mod lib;
-pub mod gameobjects;
+pub mod player;
 pub mod movingobject;

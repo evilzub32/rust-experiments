@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use model::gameobjects::{GameObject, Rotation};
+use model::player::{Player, Rotation};
 use model::movingobject::*;
 use sdl2::{event::Event, keyboard::Keycode};
 
@@ -15,7 +15,7 @@ fn main() {
     let mut running = true;
     let mut event_queue = playfield.sdl_context.event_pump().unwrap();
 
-    let mut player = GameObject::new(
+    let mut player = Player::new(
         playfield.screen_width,
         playfield.screen_height,
         (playfield.screen_width / 2) as i16,
