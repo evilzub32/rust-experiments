@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use model::gameobjects::{GameObject, Rotation};
+use model::movingobject::*;
 use sdl2::{event::Event, keyboard::Keycode};
 
 mod view;

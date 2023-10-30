@@ -1,9 +1,11 @@
 use sdl2::{render::Canvas, video::Window, pixels::Color};
 use sdl2::gfx::primitives::DrawRenderer;
 
+use super::lib::{Vector2, Point};
+use super::movingobject::MovingObject;
+
 const TURNING_SPEED: u32 = 8;
 const THRUST: f32 = -0.2;
-const MAX_SPEED: f32 = 8.;
 
 const SHIP_POLY: [Vector2; 3] = [
     Vector2{x: 0., y: -20.},
@@ -17,48 +19,6 @@ pub enum Rotation {
     Counterclockwise
 }
 
-pub struct Vector2 {
-    pub x: f32,
-    pub y: f32,
-}
-
-impl Vector2 {
-    pub fn new() -> Vector2 {
-        Vector2 { x: 0., y: 0. }
-    }
-
-    pub fn rotate(&self, angle_deg: i16) -> Vector2 {
-        // first, convert to rad
-        let angle = angle_deg as f32;
-        let angle_rad = angle.to_radians();
-        Vector2 {
-            x: angle_rad.cos() * self.x - angle_rad.sin() * self.y,
-            y: angle_rad.sin() * self.x + angle_rad.cos() * self.y,
-        }
-    }
-
-    pub fn magnitude(&self) -> f32 {
-        (self.x.powi(2) + self.y.powi(2)).sqrt()
-    }
-
-    pub fn add(&self, other: &Vector2) -> Vector2 {
-        Vector2 { x: self.x + other.x, y: self.y + other.y }
-    }
-
-    pub fn multiply(&self, num: f32) -> Vector2 {
-        if num.is_nan() {
-            Vector2 { x: self.x, y: self.y }
-        } else {
-            Vector2 { x: self.x * num, y: self.y * num }
-        }
-    }
-}
-
-#[derive(Clone, Copy)]
-pub struct Point {
-    pub x: i16,
-    pub y: i16,
-}
 pub struct GameObject {
     // choosing u32 for no particular reason
 
@@ -74,34 +34,6 @@ pub struct GameObject {
     thrust: f32,
     thrust_vector: Vector2,
     velocity_vector: Vector2,
-}
-
-pub trait MovingObject {
-    fn get_screen_width(&self) -> u32;
-    fn get_screen_height(&self) -> u32;
-    fn get_position(&self) -> &Point;
-    fn set_position(&mut self, position: &mut Point);
-
-    // if value exceeds boundary, wrap it to the "left" side of the range and the other way round
-    fn wrap_around(&mut self) {
-        let i16_screen_width = self.get_screen_width() as i16;
-        let i16_screen_height = self.get_screen_height() as i16;
-
-        let mut pos = self.get_position().clone();
-        if pos.x > i16_screen_width {
-            pos.x = pos.x - i16_screen_width;
-        } else if pos.x < 0 {
-            pos.x = i16_screen_width + pos.x;
-        }
-
-        if pos.y > i16_screen_height {
-            pos.y = pos.y - i16_screen_height;
-        } else if pos.y < 0 {
-            pos.y = i16_screen_height + pos.y;
-        }
-
-        self.set_position(&mut pos);
-    }
 }
 
 impl GameObject {
@@ -126,41 +58,6 @@ impl GameObject {
 
     pub fn decrease_thrust(&mut self) {
         self.thrust = 0.;
-    }
-
-    pub fn update(&mut self) {
-        match self.rotation {
-            Rotation::Clockwise => {
-                self.angle_deg += TURNING_SPEED as i16;
-                if self.angle_deg >= 360 {
-                    self.angle_deg = self.angle_deg - 360;
-                }
-            },
-            Rotation::Counterclockwise => {
-                self.angle_deg -= TURNING_SPEED as i16;
-                if self.angle_deg < 0 {
-                    self.angle_deg = 360 + self.angle_deg;
-                }
-            },
-            _ => {}
-        }
-        self.thrust_vector = Vector2{x: 0., y: self.thrust as f32}.rotate(self.angle_deg);
-
-        self.velocity_vector = self.velocity_vector.add(&self.thrust_vector);
-
-        // observe the speed limit
-        let speed = self.velocity_vector.magnitude();
-        if speed > MAX_SPEED {
-            let limiter = MAX_SPEED / speed;
-            self.velocity_vector = self.velocity_vector.multiply(limiter);
-        }
-
-        let mut pos = self.position;
-        pos.x += self.velocity_vector.x.round() as i16;
-        pos.y += self.velocity_vector.y.round() as i16;
-        self.set_position(&mut pos);
-
-        self.wrap_around();
     }
 
     pub fn render(&self, canvas: &mut Canvas<Window>) {
@@ -203,11 +100,42 @@ impl MovingObject for GameObject {
         self.screen_height
     }
 
-    fn get_position(&self) -> &Point {
-        &self.position
+    fn get_position(&self) -> Point {
+        self.position
     }
 
-    fn set_position(& mut self, position: &mut Point) {
-        self.position = *position;
+    fn set_position(& mut self, position: Point) {
+        self.position = position;
+    }
+
+    fn get_velocity_vector(&self) -> &Vector2 {
+        &self.velocity_vector
+    }
+
+    fn set_velocity_vector(&mut self, velocity: Vector2) {
+        self.velocity_vector = velocity;
+    }
+
+    fn update(&mut self) {
+        match self.rotation {
+            Rotation::Clockwise => {
+                self.angle_deg += TURNING_SPEED as i16;
+                if self.angle_deg >= 360 {
+                    self.angle_deg = self.angle_deg - 360;
+                }
+            },
+            Rotation::Counterclockwise => {
+                self.angle_deg -= TURNING_SPEED as i16;
+                if self.angle_deg < 0 {
+                    self.angle_deg = 360 + self.angle_deg;
+                }
+            },
+            _ => {}
+        }
+        self.thrust_vector = Vector2{x: 0., y: self.thrust as f32}.rotate(self.angle_deg);
+
+        self.set_velocity_vector(self.velocity_vector.add(&self.thrust_vector));
+
+        self.update_position();
     }
 }
