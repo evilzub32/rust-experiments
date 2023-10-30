@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use model::asteroids::Asteroid;
+use model::lib::{Point, Vector2};
 use model::player::{Player, Rotation};
 use model::movingobject::*;
 use sdl2::{event::Event, keyboard::Keycode};
@@ -20,6 +22,13 @@ fn main() {
         playfield.screen_height,
         (playfield.screen_width / 2) as i16,
         (playfield.screen_height / 2) as i16);
+
+    let mut asteroid = Asteroid {
+        screen_width: playfield.screen_width,
+        screen_height: playfield.screen_height,
+        position: Point{x: 0, y: 0},
+        velocity_vector: Vector2{ x: 1. , y: 1.},
+    };
 
     while running {
         // Events will arrive erraticly so use state in gameobject for smooth handling
@@ -54,8 +63,10 @@ fn main() {
             }
         }
 
+        asteroid.update();
         player.update();
-        playfield.render(&player);
+
+        playfield.render(&player, &asteroid);
 
         // don't know how this works exactly, but SDL2 docs say this is the way to limit to 60 fps
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));

@@ -1,3 +1,5 @@
+use sdl2::{render::Canvas, video::Window};
+
 use super::lib::{Vector2, Point, MAX_SPEED};
 
 pub trait MovingObject {
@@ -49,5 +51,7 @@ pub trait MovingObject {
         self.wrap_around();
     }
 
-    fn update(&mut self) -> ();
+    fn update(&mut self);
+
+    fn render(&self, canvas: &mut Canvas<Window>);
 }

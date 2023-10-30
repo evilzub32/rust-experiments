@@ -59,36 +59,6 @@ impl Player {
     pub fn decrease_thrust(&mut self) {
         self.thrust = 0.;
     }
-
-    pub fn render(&self, canvas: &mut Canvas<Window>) {
-        // SDL2 methods with aa_...: means "anti alias" :)
-
-        let pos = self.get_position();
-
-        let mut ship_poly_x: [i16; 3] = [0; 3];
-        let mut ship_poly_y: [i16; 3] = [0; 3];
-
-        for n in 0..3 {
-            let point = SHIP_POLY[n].rotate(self.angle_deg);
-            ship_poly_x[n] = point.x.round() as i16 + pos.x;
-            ship_poly_y[n] = point.y.round() as i16 + pos.y;
-        }
-
-        canvas.aa_polygon(&ship_poly_x, &ship_poly_y, Color::YELLOW).unwrap();
-
-        // paint thrust vector in green
-        let indicator = Vector2 { x: 0., y: 1.}.rotate(self.angle_deg);
-
-        canvas.aa_line(
-            pos.x as i16,
-            pos.y as i16,
-            // multiply with scaling factor to make it visible
-            pos.x as i16 + (indicator.x * 20.) as i16,
-            pos.y as i16 + (indicator.y * 20.) as i16,
-            Color::GREEN
-        ).unwrap();
-    }
-
 }
 
 impl MovingObject for Player {
@@ -137,5 +107,34 @@ impl MovingObject for Player {
         self.set_velocity_vector(self.velocity_vector.add(&self.thrust_vector));
 
         self.update_position();
+    }
+
+    fn render(&self, canvas: &mut Canvas<Window>) {
+        // SDL2 methods with aa_...: means "anti alias" :)
+
+        let pos = self.get_position();
+
+        let mut ship_poly_x: [i16; 3] = [0; 3];
+        let mut ship_poly_y: [i16; 3] = [0; 3];
+
+        for n in 0..3 {
+            let point = SHIP_POLY[n].rotate(self.angle_deg);
+            ship_poly_x[n] = point.x.round() as i16 + pos.x;
+            ship_poly_y[n] = point.y.round() as i16 + pos.y;
+        }
+
+        canvas.polygon(&ship_poly_x, &ship_poly_y, Color::YELLOW).unwrap();
+
+        // paint thrust vector in green
+        let indicator = Vector2 { x: 0., y: 1.}.rotate(self.angle_deg);
+
+        canvas.line(
+            pos.x as i16,
+            pos.y as i16,
+            // multiply with scaling factor to make it visible
+            pos.x as i16 + (indicator.x * 20.) as i16,
+            pos.y as i16 + (indicator.y * 20.) as i16,
+            Color::GREEN
+        ).unwrap();
     }
 }

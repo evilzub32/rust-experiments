@@ -3,13 +3,17 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+use crate::model::asteroids::Asteroid;
+use crate::model::movingobject::MovingObject;
 use crate::model::player::Player;
+
 
 pub struct Renderer {
     pub screen_width: u32,
     pub screen_height: u32,
     canvas: Canvas<Window>,
     pub sdl_context: Sdl,
+
 }
 
 impl Renderer {
@@ -26,13 +30,17 @@ impl Renderer {
             screen_width: screen_width,
             screen_height: screen_height,
             canvas: window.into_canvas().build().unwrap(),
-            sdl_context: sdl_context
+            sdl_context: sdl_context,
         }
     }
 
-    pub fn render(&mut self, player: &Player) {
+
+
+    pub fn render(&mut self, player: &Player, asteroid: &Asteroid) {
         self.canvas.set_draw_color(Color::RGB(0,0,0));
         self.canvas.clear();
+
+        asteroid.render(&mut self.canvas);
 
         player.render(&mut self.canvas);
 
