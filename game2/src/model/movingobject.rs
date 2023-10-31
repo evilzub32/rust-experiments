@@ -1,7 +1,7 @@
 use sdl2::{render::Canvas, video::Window, pixels::Color};
 use sdl2::gfx::primitives::DrawRenderer;
 
-use super::lib::{Vector2, Point, Rotation};
+use super::lib::{Vector2, Point, Rotation, BoundingBox};
 
 pub struct MovingObject {
     // need screen dimension to calculate wrap-around
@@ -21,7 +21,7 @@ pub struct MovingObject {
     pub max_speed: f32,
     pub max_thrust: f32,
 
-    pub polygon: Vec<Vector2>,
+    pub shape: Vec<Vector2>,
     rotated_poly: Vec<Vector2>,
 }
 
@@ -37,7 +37,7 @@ impl MovingObject {
         MovingObject {
             screen_width: screen_width,
             screen_height: screen_height,
-            polygon: polygon.clone(),
+            shape: polygon.clone(),
             position: Point{
                 x: x.unwrap_or((screen_width / 2) as i16),
                 y: y.unwrap_or((screen_height / 2) as i16)
@@ -71,10 +71,13 @@ impl MovingObject {
         }
     }
 
-    fn rotate_polygon(&mut self) {
+    fn update_polygon(&mut self) {
         let mut v: Vec<Vector2> = Vec::new();
-        for point in self.polygon.iter() {
-            v.push(point.rotate(self.angle_deg));
+        for point in self.shape.iter() {
+            let mut rnode = point.rotate(self.angle_deg);
+            rnode.x += self.position.x as f32;
+            rnode.y += self.position.y as f32;
+            v.push(rnode);
         }
         self.rotated_poly = v;
     }
@@ -88,7 +91,7 @@ impl MovingObject {
     }
 
     pub fn update(&mut self) {
-        // Step 1: Rotate thrust vector and polygon
+        // Step 1: Calculate rotation angle
         //TODO: Maybe this can be simplified with numeric value for turnrate
         match self.rotation {
             Rotation::Clockwise => {
@@ -97,8 +100,6 @@ impl MovingObject {
                 if self.angle_deg >= 360. {
                     self.angle_deg = self.angle_deg - 360.;
                 }
-
-                self.rotate_polygon();
             },
             Rotation::Counterclockwise => {
                 self.angle_deg -= self.turnrate;
@@ -106,11 +107,10 @@ impl MovingObject {
                 if self.angle_deg < 0. {
                     self.angle_deg = 360. + self.angle_deg;
                 }
-
-                self.rotate_polygon();
             },
             _ => {}
         }
+
         // thrust value should be positive but initial orientation should be upwards -> negative y
         self.thrust_vector = Vector2{x: 0., y: -self.thrust}.rotate(self.angle_deg);
 
@@ -131,6 +131,8 @@ impl MovingObject {
         // step 5: Calculate wrap-around for center position
         // TODO: This does not work well for large, slow objects (asteroids)
         self.wrap_around();
+
+        self.update_polygon();
     }
 
     pub fn render(&self, canvas: &mut Canvas<Window>, color: Color) {
@@ -140,10 +142,31 @@ impl MovingObject {
         let mut poly_y = Vec::new();
 
         for point in self.rotated_poly.iter() {
-            poly_x.push(point.x.round() as i16 + self.position.x);
-            poly_y.push(point.y.round() as i16 + self.position.y);
+            poly_x.push(point.x.round() as i16);
+            poly_y.push(point.y.round() as i16);
         }
 
         canvas.polygon(&poly_x, &poly_y, color).unwrap();
+    }
+
+    pub fn get_bounding_box(&self) -> BoundingBox {
+        let mut bbox = BoundingBox::new();
+
+        for node in self.rotated_poly.iter() {
+            if node.x > bbox.x_max{
+                bbox.x_max = node.x;
+            }
+            if node.x < bbox.x_min {
+                bbox.x_min = node.x
+            }
+            if node.y > bbox.y_max {
+                bbox.y_max = node.y
+            }
+            if node.y < bbox.y_min {
+                bbox.y_min = node.y
+            }
+        }
+
+        bbox
     }
 }

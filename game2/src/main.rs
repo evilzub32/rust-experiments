@@ -79,6 +79,11 @@ fn main() {
         asteroid.update();
         player.update();
 
+        let collision = player.get_bounding_box().collides(&asteroid.get_bounding_box());
+        if collision {
+            println!("BOING!");
+        }
+
         playfield.render(&player, &asteroid);
 
         // don't know how this works exactly, but SDL2 docs say this is the way to limit to 60 fps
