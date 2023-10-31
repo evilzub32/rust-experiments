@@ -23,12 +23,16 @@ pub struct MovingObject {
 
     pub shape: Vec<Vector2>,
     rotated_poly: Vec<Vector2>,
+    pub color: Color,
+
+    pub collides: bool,
 }
 
 impl MovingObject {
     // static new method as "constructor"
     pub fn new(screen_width: u32, screen_height: u32,
         polygon: Vec<Vector2>,
+        color: Option<Color>,
         x: Option<i16>,
         y: Option<i16>,
         turnrate: Option<f32>,
@@ -37,6 +41,7 @@ impl MovingObject {
         MovingObject {
             screen_width: screen_width,
             screen_height: screen_height,
+            color: color.unwrap_or(Color::WHITE),
             shape: polygon.clone(),
             position: Point{
                 x: x.unwrap_or((screen_width / 2) as i16),
@@ -51,6 +56,7 @@ impl MovingObject {
             max_speed: max_speed.unwrap_or(12.),
             max_thrust: 0.2,
             rotated_poly: polygon.clone(),
+            collides: false,
         }
     }
 
@@ -135,7 +141,7 @@ impl MovingObject {
         self.update_polygon();
     }
 
-    pub fn render(&self, canvas: &mut Canvas<Window>, color: Color) {
+    pub fn render(&self, canvas: &mut Canvas<Window>) {
         // SDL2 methods with aa_...: means "anti alias" :)
 
         let mut poly_x = Vec::new();
@@ -144,6 +150,11 @@ impl MovingObject {
         for point in self.rotated_poly.iter() {
             poly_x.push(point.x.round() as i16);
             poly_y.push(point.y.round() as i16);
+        }
+
+        let mut color = self.color;
+        if self.collides {
+            color = Color::RED;
         }
 
         canvas.polygon(&poly_x, &poly_y, color).unwrap();

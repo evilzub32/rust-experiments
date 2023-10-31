@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use model::lib::{Vector2, Rotation};
 use model::movingobject::MovingObject;
+use sdl2::pixels::Color;
 use sdl2::{event::Event, keyboard::Keycode};
 
 mod view;
@@ -23,7 +24,7 @@ fn main() {
             Vector2{x: 15., y: 20.},
             Vector2{x: -15., y: 20.},
         ],
-        None, None, Some(8.), Some(12.));
+        Some(Color::YELLOW), None, None, Some(8.), Some(12.));
 
     let mut asteroid = MovingObject::new (
         playfield.screen_width,
@@ -39,7 +40,7 @@ fn main() {
             Vector2{x: -40., y: 4.}, // 8
             Vector2{x: -40., y: -20.}, // 9
         ],
-        Some(0), Some(0), Some(0.4), None);
+        Some(Color::GRAY), Some(0), Some(0), Some(0.4), None);
     asteroid.velocity_vector = Vector2{x: 1., y: 1.};
     asteroid.rotation = Rotation::Clockwise;
 
@@ -81,7 +82,9 @@ fn main() {
 
         let collision = player.get_bounding_box().collides(&asteroid.get_bounding_box());
         if collision {
-            println!("BOING!");
+            player.collides = true;
+        } else {
+            player.collides = false;
         }
 
         playfield.render(&player, &asteroid);

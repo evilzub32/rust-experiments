@@ -37,9 +37,9 @@ impl Renderer {
         self.canvas.set_draw_color(Color::RGB(0,0,0));
         self.canvas.clear();
 
-        asteroid.render(&mut self.canvas, Color::GRAY);
+        asteroid.render(&mut self.canvas);
 
-        player.render(&mut self.canvas, Color::YELLOW);
+        player.render(&mut self.canvas);
 
         self.canvas.present();
     }
