@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-use model::asteroids::Asteroid;
-use model::lib::{Point, Vector2, Rotation};
-use model::player::Player;
+use model::lib::{Vector2, Rotation};
 use model::movingobject::MovingObject;
 use sdl2::{event::Event, keyboard::Keycode};
 
@@ -17,25 +15,33 @@ fn main() {
     let mut running = true;
     let mut event_queue = playfield.sdl_context.event_pump().unwrap();
 
-    let mut player = Player::new(
+    let mut player = MovingObject::new (
         playfield.screen_width,
         playfield.screen_height,
-        (playfield.screen_width / 2) as i16,
-        (playfield.screen_height / 2) as i16);
+        vec![
+            Vector2{x: 0., y: -20.},
+            Vector2{x: 15., y: 20.},
+            Vector2{x: -15., y: 20.},
+        ],
+        None, None, Some(8.), Some(12.));
 
-    let mut asteroid = Asteroid {
-        screen_width: playfield.screen_width,
-        screen_height: playfield.screen_height,
-        position: Point{x: 0, y: 0},
-        angle_deg: 0.,
-        rotation: Rotation::Clockwise,
-        turnrate: 0.4,
-        velocity_vector: Vector2{ x: 1. , y: 1.},
-
-        thrust_vector: Vector2 { x: 0., y: 0. },
-        thrust: 0.,
-        max_speed: 8.,
-    };
+    let mut asteroid = MovingObject::new (
+        playfield.screen_width,
+        playfield.screen_height,
+        vec![
+            Vector2{x: -20., y: -40.}, // 1
+            Vector2{x: 20., y: -40.}, // 2
+            Vector2{x: 40., y: -6.}, // 3
+            Vector2{x: 8., y: 6.}, // 4
+            Vector2{x: 16., y: 40.}, // 5
+            Vector2{x: -24., y: 34.}, // 6
+            Vector2{x: -26., y: 6.}, // 7
+            Vector2{x: -40., y: 4.}, // 8
+            Vector2{x: -40., y: -20.}, // 9
+        ],
+        Some(0), Some(0), Some(0.4), None);
+    asteroid.velocity_vector = Vector2{x: 1., y: 1.};
+    asteroid.rotation = Rotation::Clockwise;
 
     while running {
         // Events will arrive erraticly so use state in gameobject for smooth handling
