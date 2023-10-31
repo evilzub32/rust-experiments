@@ -1,10 +1,9 @@
 use sdl2::{render::Canvas, video::Window, pixels::Color};
 use sdl2::gfx::primitives::DrawRenderer;
 
-use super::lib::{Vector2, Point};
+use super::lib::{Vector2, Point, Rotation};
 use super::movingobject::MovingObject;
 
-const TURNING_SPEED: u32 = 8;
 const THRUST: f32 = -0.2;
 
 const SHIP_POLY: [Vector2; 3] = [
@@ -12,12 +11,6 @@ const SHIP_POLY: [Vector2; 3] = [
     Vector2{x: 15., y: 20.},
     Vector2{x: -15., y: 20.},
 ];
-
-pub enum Rotation {
-    None,
-    Clockwise,
-    Counterclockwise
-}
 
 pub struct Player {
     // choosing u32 for no particular reason
@@ -28,12 +21,14 @@ pub struct Player {
 
     pub position: Point,
 
-    pub angle_deg: i16,
+    pub angle_deg: f32,
     pub rotation: Rotation,
+    pub turnrate: f32,
 
     thrust: f32,
     thrust_vector: Vector2,
     velocity_vector: Vector2,
+    max_speed: f32,
 }
 
 impl Player {
@@ -43,12 +38,14 @@ impl Player {
         Player {
             screen_width: screen_width,
             screen_height: screen_height,
-            position: Point{x: x, y: y},
-            angle_deg: 0,
+            position: Point{x, y},
+            angle_deg: 0.,
             rotation: Rotation::None,
+            turnrate: 8.,
             thrust: 0.,
             thrust_vector: Vector2::new(),
-            velocity_vector: Vector2::new()
+            velocity_vector: Vector2::new(),
+            max_speed: 12.,
         }
     }
 
@@ -78,35 +75,60 @@ impl MovingObject for Player {
         self.position = position;
     }
 
-    fn get_velocity_vector(&self) -> &Vector2 {
-        &self.velocity_vector
+    fn get_velocity_vector(&self) -> Vector2 {
+        self.velocity_vector
     }
 
     fn set_velocity_vector(&mut self, velocity: Vector2) {
         self.velocity_vector = velocity;
     }
 
-    fn update(&mut self) {
-        match self.rotation {
-            Rotation::Clockwise => {
-                self.angle_deg += TURNING_SPEED as i16;
-                if self.angle_deg >= 360 {
-                    self.angle_deg = self.angle_deg - 360;
-                }
-            },
-            Rotation::Counterclockwise => {
-                self.angle_deg -= TURNING_SPEED as i16;
-                if self.angle_deg < 0 {
-                    self.angle_deg = 360 + self.angle_deg;
-                }
-            },
-            _ => {}
-        }
-        self.thrust_vector = Vector2{x: 0., y: self.thrust as f32}.rotate(self.angle_deg);
+    fn get_rotation(&self) -> Rotation {
+        self.rotation
+    }
 
-        self.set_velocity_vector(self.velocity_vector.add(&self.thrust_vector));
+    fn set_rotation(&mut self, rotation: Rotation) {
+        self.rotation = rotation;
+    }
 
-        self.update_position();
+    fn get_angle_deg(&self) -> f32 {
+        self.angle_deg
+    }
+
+    fn set_angle_deg(&mut self, angle_deg: f32) {
+        self.angle_deg = angle_deg;
+    }
+
+    fn get_turnrate(&self) -> f32 {
+        self.turnrate
+    }
+
+    fn set_turnrate(&mut self, turnrate: f32) {
+        self.turnrate = turnrate
+    }
+
+    fn get_thrust_vector(&self) -> Vector2 {
+        self.thrust_vector
+    }
+
+    fn set_thrust_vector(&mut self, thrust_vector: Vector2) {
+        self.thrust_vector = thrust_vector
+    }
+
+    fn get_thrust(&self) -> f32 {
+        self.thrust
+    }
+
+    fn set_thrust(&mut self, thrust: f32) {
+        self.thrust = thrust
+    }
+
+    fn get_max_speed(&self) -> f32 {
+        self.max_speed
+    }
+
+    fn set_max_speed(&mut self, max_speed: f32) {
+        self.max_speed = max_speed;
     }
 
     fn render(&self, canvas: &mut Canvas<Window>) {

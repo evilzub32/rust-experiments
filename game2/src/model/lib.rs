@@ -1,5 +1,3 @@
-pub const MAX_SPEED: f32 = 8.;
-
 #[derive(Clone, Copy)]
 pub struct Point {
     pub x: i16,
@@ -12,12 +10,19 @@ pub struct Vector2 {
     pub y: f32,
 }
 
+#[derive(Clone, Copy)]
+pub enum Rotation {
+    None,
+    Clockwise,
+    Counterclockwise
+}
+
 impl Vector2 {
     pub fn new() -> Vector2 {
         Vector2 { x: 0., y: 0. }
     }
 
-    pub fn rotate(&self, angle_deg: i16) -> Vector2 {
+    pub fn rotate(&self, angle_deg: f32) -> Vector2 {
         // first, convert to rad
         let angle = angle_deg as f32;
         let angle_rad = angle.to_radians();

@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use model::asteroids::Asteroid;
-use model::lib::{Point, Vector2};
-use model::player::{Player, Rotation};
-use model::movingobject::*;
+use model::lib::{Point, Vector2, Rotation};
+use model::player::Player;
+use model::movingobject::MovingObject;
 use sdl2::{event::Event, keyboard::Keycode};
 
 mod view;
@@ -27,7 +27,14 @@ fn main() {
         screen_width: playfield.screen_width,
         screen_height: playfield.screen_height,
         position: Point{x: 0, y: 0},
+        angle_deg: 0.,
+        rotation: Rotation::Clockwise,
+        turnrate: 0.4,
         velocity_vector: Vector2{ x: 1. , y: 1.},
+
+        thrust_vector: Vector2 { x: 0., y: 0. },
+        thrust: 0.,
+        max_speed: 8.,
     };
 
     while running {
