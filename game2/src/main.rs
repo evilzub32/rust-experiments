@@ -11,7 +11,7 @@ use view::playfield;
 mod model;
 
 fn main() {
-    let mut playfield: playfield::Renderer = playfield::Renderer::new(800, 600);
+    let mut playfield: playfield::Renderer = playfield::Renderer::new(1024, 768);
 
     let mut running = true;
     let mut event_queue = playfield.sdl_context.event_pump().unwrap();
@@ -23,8 +23,10 @@ fn main() {
             Vector2{x: 0., y: -20.},
             Vector2{x: 15., y: 20.},
             Vector2{x: -15., y: 20.},
-        ],
-        Some(Color::YELLOW), None, None, Some(8.), Some(12.));
+    ]);
+    player.default_color = Color::YELLOW;
+    player.turnrate = 9.;
+    player.max_speed = 12.;
 
     let mut asteroid = MovingObject::new (
         playfield.screen_width,
@@ -39,13 +41,19 @@ fn main() {
             Vector2{x: -26., y: 6.}, // 7
             Vector2{x: -40., y: 4.}, // 8
             Vector2{x: -40., y: -20.}, // 9
-        ],
-        Some(Color::GRAY), Some(0), Some(0), Some(0.4), None);
+        ]);
+    asteroid.position = model::lib::Point{x: 0, y: 0};
+    asteroid.default_color = Color::GRAY;
+    asteroid.turnrate = 0.4;
     asteroid.velocity_vector = Vector2{x: 1., y: 1.};
     asteroid.rotation = Rotation::Clockwise;
 
+    // FIXME: Borrow-Checker does not think this is a good idea...
+    // playfield.renderables.push(&asteroid);
+    // playfield.renderables.push(&player);
+
     while running {
-        // Events will arrive erraticly so use state in gameobject for smooth handling
+        // Events will arrive erratically so use state in game-object for smooth handling
         for event in event_queue.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -80,14 +88,17 @@ fn main() {
         asteroid.update();
         player.update();
 
-        let collision = player.get_bounding_box().collides(&asteroid.get_bounding_box());
-        if collision {
-            player.collides = true;
+        if player.get_bounding_box().collides(&asteroid.get_bounding_box()) {
+            player.set_colliding(true);
+            asteroid.set_colliding(true);
         } else {
-            player.collides = false;
+            player.set_colliding(false);
+            asteroid.set_colliding(false);
         }
 
-        playfield.render(&player, &asteroid);
+        // check_collisions(vec![Box::new(asteroid), Box::new(player)]);
+
+        playfield.render(&vec![&asteroid, &player]);
 
         // don't know how this works exactly, but SDL2 docs say this is the way to limit to 60 fps
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));

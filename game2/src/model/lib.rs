@@ -31,7 +31,7 @@ impl Vector2 {
 
     pub fn rotate(&self, angle_deg: f32) -> Vector2 {
         // first, convert to rad
-        let angle = angle_deg as f32;
+        let angle = angle_deg;
         let angle_rad = angle.to_radians();
         Vector2 {
             x: angle_rad.cos() * self.x - angle_rad.sin() * self.y,

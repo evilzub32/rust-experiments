@@ -1,16 +1,15 @@
-use sdl2::Sdl;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
+use sdl2::Sdl;
 use sdl2::video::Window;
 
-use crate::model::movingobject::MovingObject;
+use crate::view::renderable::Renderable;
 
 pub struct Renderer {
     pub screen_width: u32,
     pub screen_height: u32,
     canvas: Canvas<Window>,
     pub sdl_context: Sdl,
-
 }
 
 impl Renderer {
@@ -24,22 +23,20 @@ impl Renderer {
             .unwrap();
 
         Self {
-            screen_width: screen_width,
-            screen_height: screen_height,
+            screen_width,
+            screen_height,
             canvas: window.into_canvas().build().unwrap(),
-            sdl_context: sdl_context,
+            sdl_context,
         }
     }
 
-
-
-    pub fn render(&mut self, player: &MovingObject, asteroid: &MovingObject) {
+    pub fn render(&mut self, renderables: &Vec<&dyn Renderable>,) {
         self.canvas.set_draw_color(Color::RGB(0,0,0));
         self.canvas.clear();
 
-        asteroid.render(&mut self.canvas);
-
-        player.render(&mut self.canvas);
+        for renderable in renderables {
+            renderable.render(&self.canvas);
+        }
 
         self.canvas.present();
     }

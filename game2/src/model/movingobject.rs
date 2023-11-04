@@ -1,7 +1,8 @@
-use sdl2::{render::Canvas, video::Window, pixels::Color};
-use sdl2::gfx::primitives::DrawRenderer;
+use sdl2::pixels::Color;
 
-use super::lib::{Vector2, Point, Rotation, BoundingBox};
+use crate::view::renderable::Renderable;
+
+use super::lib::{BoundingBox, Point, Rotation, Vector2};
 
 pub struct MovingObject {
     // need screen dimension to calculate wrap-around
@@ -23,40 +24,33 @@ pub struct MovingObject {
 
     pub shape: Vec<Vector2>,
     rotated_poly: Vec<Vector2>,
-    pub color: Color,
 
-    pub collides: bool,
+    pub default_color: Color,
+    current_color: Color,
+    is_colliding: bool,
 }
 
 impl MovingObject {
     // static new method as "constructor"
-    pub fn new(screen_width: u32, screen_height: u32,
-        polygon: Vec<Vector2>,
-        color: Option<Color>,
-        x: Option<i16>,
-        y: Option<i16>,
-        turnrate: Option<f32>,
-        max_speed: Option<f32>) -> MovingObject {
+    pub fn new(screen_width: u32, screen_height: u32, polygon: Vec<Vector2>) -> MovingObject {
 
         MovingObject {
-            screen_width: screen_width,
-            screen_height: screen_height,
-            color: color.unwrap_or(Color::WHITE),
+            screen_width,
+            screen_height,
+            default_color: Color::WHITE,
+            current_color: Color::WHITE,
             shape: polygon.clone(),
-            position: Point{
-                x: x.unwrap_or((screen_width / 2) as i16),
-                y: y.unwrap_or((screen_height / 2) as i16)
-            },
+            position: Point{x: (screen_width / 2) as i16, y: (screen_height / 2) as i16},
             angle_deg: 0.,
             rotation: Rotation::None,
-            turnrate: turnrate.unwrap_or(8.),
+            turnrate: 8.,
             thrust: 0.,
             thrust_vector: Vector2::new(),
             velocity_vector: Vector2::new(),
-            max_speed: max_speed.unwrap_or(12.),
+            max_speed: 12.,
             max_thrust: 0.2,
-            rotated_poly: polygon.clone(),
-            collides: false,
+            rotated_poly: Vec::new(),
+            is_colliding: false,
         }
     }
 
@@ -65,15 +59,15 @@ impl MovingObject {
         let i16_screen_height = self.screen_height as i16;
 
         if self.position.x > i16_screen_width {
-            self.position.x = self.position.x - i16_screen_width;
+            self.position.x -= i16_screen_width;
         } else if self.position.x < 0 {
-            self.position.x = i16_screen_width + self.position.x;
+            self.position.x += i16_screen_width;
         }
 
         if self.position.y > i16_screen_height {
-            self.position.y = self.position.y - i16_screen_height;
+            self.position.y -= i16_screen_height;
         } else if self.position.y < 0 {
-            self.position.y = i16_screen_height + self.position.y;
+            self.position.y += i16_screen_height;
         }
     }
 
@@ -104,14 +98,14 @@ impl MovingObject {
                 self.angle_deg += self.turnrate;
 
                 if self.angle_deg >= 360. {
-                    self.angle_deg = self.angle_deg - 360.;
+                    self.angle_deg -= 360.;
                 }
             },
             Rotation::Counterclockwise => {
                 self.angle_deg -= self.turnrate;
 
                 if self.angle_deg < 0. {
-                    self.angle_deg = 360. + self.angle_deg;
+                    self.angle_deg += 360.;
                 }
             },
             _ => {}
@@ -141,25 +135,6 @@ impl MovingObject {
         self.update_polygon();
     }
 
-    pub fn render(&self, canvas: &mut Canvas<Window>) {
-        // SDL2 methods with aa_...: means "anti alias" :)
-
-        let mut poly_x = Vec::new();
-        let mut poly_y = Vec::new();
-
-        for point in self.rotated_poly.iter() {
-            poly_x.push(point.x.round() as i16);
-            poly_y.push(point.y.round() as i16);
-        }
-
-        let mut color = self.color;
-        if self.collides {
-            color = Color::RED;
-        }
-
-        canvas.polygon(&poly_x, &poly_y, color).unwrap();
-    }
-
     pub fn get_bounding_box(&self) -> BoundingBox {
         let mut bbox = BoundingBox::new();
 
@@ -179,5 +154,25 @@ impl MovingObject {
         }
 
         bbox
+    }
+
+    pub fn set_colliding(&mut self, is_colliding: bool) {
+        if is_colliding {
+            self.is_colliding = true;
+            self.current_color = Color::RED;
+        } else {
+            self.is_colliding = false;
+            self.current_color = self.default_color;
+        }
+    }
+}
+
+impl Renderable for MovingObject {
+    fn get_polygon(&self) -> &Vec<Vector2> {
+        &self.rotated_poly
+    }
+
+    fn get_color(&self) -> Color {
+        self.current_color
     }
 }
