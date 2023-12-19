@@ -23,10 +23,10 @@ pub struct MovingObject {
     pub max_thrust: f32,
 
     pub shape: Vec<Vector2>,
-    rotated_poly: Vec<Vector2>,
+    pub rotated_poly: Vec<Vector2>,
 
     pub default_color: Color,
-    current_color: Color,
+    pub current_color: Color,
     is_colliding: bool,
 }
 

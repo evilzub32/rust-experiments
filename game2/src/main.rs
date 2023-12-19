@@ -1,6 +1,5 @@
 use std::time::Duration;
-
-use model::asteroid::Asteroid;
+use model::asteroid::{Asteroid, Size};
 use model::lib::{Vector2, Rotation};
 use model::movingobject::MovingObject;
 use sdl2::pixels::Color;
@@ -29,27 +28,7 @@ fn main() {
     player.turnrate = 9.;
     player.max_speed = 12.;
 
-    // let mut asteroid = MovingObject::new (
-    //     playfield.screen_width,
-    //     playfield.screen_height,
-    //     vec![
-    //         Vector2{x: -20., y: -40.}, // 1
-    //         Vector2{x: 20., y: -40.}, // 2
-    //         Vector2{x: 40., y: -6.}, // 3
-    //         Vector2{x: 8., y: 6.}, // 4
-    //         Vector2{x: 16., y: 40.}, // 5
-    //         Vector2{x: -24., y: 34.}, // 6
-    //         Vector2{x: -26., y: 6.}, // 7
-    //         Vector2{x: -40., y: 4.}, // 8
-    //         Vector2{x: -40., y: -20.}, // 9
-    //     ]);
-    // asteroid.position = model::lib::Point{x: 0, y: 0};
-    // asteroid.default_color = Color::GRAY;
-    // asteroid.turnrate = 0.4;
-    // asteroid.velocity_vector = Vector2{x: 1., y: 1.};
-    // asteroid.rotation = Rotation::Clockwise;
-
-    let mut asteroid = Asteroid::new(playfield.screen_width, playfield.screen_height);
+    let mut asteroid = Asteroid::new(Size::Medium, playfield.screen_width, playfield.screen_height);
 
     // FIXME: Borrow-Checker does not think this is a good idea...
     // playfield.renderables.push(&asteroid);
@@ -88,7 +67,7 @@ fn main() {
             }
         }
 
-        asteroid.entity.update();
+        asteroid.update();
         player.update();
 
         if player.get_bounding_box().collides(&asteroid.entity.get_bounding_box()) {
@@ -101,7 +80,7 @@ fn main() {
 
         // check_collisions(vec![Box::new(asteroid), Box::new(player)]);
 
-        playfield.render(&vec![&asteroid.entity, &player]);
+        playfield.render(&vec![&asteroid, &player]);
 
         // don't know how this works exactly, but SDL2 docs say this is the way to limit to 60 fps
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
