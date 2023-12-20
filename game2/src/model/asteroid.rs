@@ -54,37 +54,27 @@ impl Asteroid {
 fn generate_shape(mass: &Size) -> Vec<Vector2> {
     let mut rng = rand::thread_rng();
 
-    let num_nodes = 6;
+    let num_nodes = 8;
     let mut shape:Vec<Vector2> = Vec::new();
 
     let step = 360.0 / num_nodes as f32;
-    let radius = mass.multiply(7);
+    let radius = mass.multiply(7) as f32;
 
     for i in 0..num_nodes {
         let deg = i as f32 * step;
-        let angle = deg.to_radians();
+        let rad = deg.to_radians();
 
-        let x = radius as f32 * angle.sin() + rng.gen::<f32>() * 10 as f32 * (if rng.gen::<bool>() { 1 as f32 } else { -1 as f32 });
-        println!("{}", x);
-
-        let y = radius as f32 * angle.cos() + rng.gen::<f32>() * 10 as f32 * (if rng.gen::<bool>() { 1 as f32 } else { -1 as f32 });
-        println!("{}", y);
+        // asteroid shape generation:
+        // radius * sin/cos paints a circle
+        // adding random makes circle irregular
+        // multiplying random number with random 1/-1 makes it even more irregular
+        let x = radius * rad.sin() + rng.gen_range(10.0..20.0) * (if rng.gen::<bool>() { 1_f32 } else { -1_f32 });
+        let y = radius * rad.cos() + rng.gen_range(10.0..20.0) * (if rng.gen::<bool>() { 1_f32 } else { -1_f32 });
 
         shape.push(Vector2{x, y});
     }
 
     shape
-    // vec![
-    //     Vector2{x: -20., y: -40.}, // 1
-    //     Vector2{x: 20., y: -40.}, // 2
-    //     Vector2{x: 40., y: -6.}, // 3
-    //     Vector2{x: 8., y: 6.}, // 4
-    //     Vector2{x: 16., y: 40.}, // 5
-    //     Vector2{x: -24., y: 34.}, // 6
-    //     Vector2{x: -26., y: 6.}, // 7
-    //     Vector2{x: -40., y: 4.}, // 8
-    //     Vector2{x: -40., y: -20.}, // 9
-    // ]
 }
 
 impl Renderable for Asteroid {
