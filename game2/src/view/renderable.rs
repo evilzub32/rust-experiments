@@ -8,6 +8,7 @@ use crate::model::lib::Vector2;
 pub trait Renderable {
     fn get_polygon(&self) -> &Vec<Vector2>;
     fn get_color(&self) -> Color;
+    
     fn render(&self, canvas: &Canvas<Window>) {
         // SDL2 methods with aa_...: means "anti alias" :)
 

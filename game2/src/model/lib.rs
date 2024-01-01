@@ -4,7 +4,7 @@ pub struct Point {
     pub y: i16,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vector2 {
     pub x: f32,
     pub y: f32,

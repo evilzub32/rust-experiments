@@ -1,6 +1,7 @@
 use sdl2::pixels::Color;
 
 use crate::view::renderable::Renderable;
+use 
 
 use super::lib::{BoundingBox, Point, Rotation, Vector2};
 
@@ -90,50 +91,50 @@ impl MovingObject {
         self.thrust = 0.;
     }
 
-    pub fn update(&mut self) {
-        // Step 1: Calculate rotation angle
-        //TODO: Maybe this can be simplified with numeric value for turnrate
-        match self.rotation {
-            Rotation::Clockwise => {
-                self.angle_deg += self.turnrate;
+    // pub fn update(&mut self) {
+    //     // Step 1: Calculate rotation angle
+    //     //TODO: Maybe this can be simplified with numeric value for turnrate
+    //     match self.rotation {
+    //         Rotation::Clockwise => {
+    //             self.angle_deg += self.turnrate;
 
-                if self.angle_deg >= 360. {
-                    self.angle_deg -= 360.;
-                }
-            },
-            Rotation::Counterclockwise => {
-                self.angle_deg -= self.turnrate;
+    //             if self.angle_deg >= 360. {
+    //                 self.angle_deg -= 360.;
+    //             }
+    //         },
+    //         Rotation::Counterclockwise => {
+    //             self.angle_deg -= self.turnrate;
 
-                if self.angle_deg < 0. {
-                    self.angle_deg += 360.;
-                }
-            },
-            _ => {}
-        }
+    //             if self.angle_deg < 0. {
+    //                 self.angle_deg += 360.;
+    //             }
+    //         },
+    //         _ => {}
+    //     }
 
-        // thrust value should be positive but initial orientation should be upwards -> negative y
-        self.thrust_vector = Vector2{x: 0., y: -self.thrust}.rotate(self.angle_deg);
+    //     // thrust value should be positive but initial orientation should be upwards -> negative y
+    //     self.thrust_vector = Vector2{x: 0., y: -self.thrust}.rotate(self.angle_deg);
 
-        // Step 2: add thrust vector to current velocity vector
-        self.velocity_vector = self.velocity_vector.add(&self.thrust_vector);
+    //     // Step 2: add thrust vector to current velocity vector
+    //     self.velocity_vector = self.velocity_vector.add(&self.thrust_vector);
 
-        // Step 3: observe the speed limit
-        let speed = self.velocity_vector.magnitude();
-        if speed > self.max_speed {
-            let limiter = self.max_speed / speed;
-            self.velocity_vector = self.velocity_vector.multiply(limiter);
-        }
+    //     // Step 3: observe the speed limit
+    //     let speed = self.velocity_vector.magnitude();
+    //     if speed > self.max_speed {
+    //         let limiter = self.max_speed / speed;
+    //         self.velocity_vector = self.velocity_vector.multiply(limiter);
+    //     }
 
-        // Step 4: update center position
-        self.position.x += self.velocity_vector.x.round() as i16;
-        self.position.y += self.velocity_vector.y.round() as i16;
+    //     // Step 4: update center position
+    //     self.position.x += self.velocity_vector.x.round() as i16;
+    //     self.position.y += self.velocity_vector.y.round() as i16;
 
-        // step 5: Calculate wrap-around for center position
-        // TODO: This does not work well for large, slow objects (asteroids)
-        self.wrap_around();
+    //     // step 5: Calculate wrap-around for center position
+    //     // TODO: This does not work well for large, slow objects (asteroids)
+    //     self.wrap_around();
 
-        self.update_polygon();
-    }
+    //     self.update_polygon();
+    // }
 
     pub fn get_bounding_box(&self) -> BoundingBox {
         let mut bbox = BoundingBox::new();
@@ -176,3 +177,5 @@ impl Renderable for MovingObject {
         self.current_color
     }
 }
+
+impl Entity for MovingObject {}
