@@ -2,7 +2,7 @@ use sdl2::{pixels::Color, keyboard::Keycode};
 
 use crate::view::renderable::Renderable;
 
-use super::{lib::{BoundingBox, Rotation, Vector2}, entity::{Entity, KeyListener}};
+use super::{lib::Vector2, entity::{Entity, KeyListener}};
 
 #[derive(Debug)]
 pub struct Player {

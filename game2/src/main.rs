@@ -1,14 +1,13 @@
 use std::time::Duration;
 // use model::asteroid::{Asteroid, Size};
-use model::entity::{Entity, KeyListener, self};
-use model::lib::{Vector2, Rotation};
+use model::entity::{Entity, KeyListener};
+use model::lib::Vector2;
 use model::player::Player;
 use sdl2::pixels::Color;
-use sdl2::{event::Event, keyboard::Keycode};
+use sdl2::event::Event;
 
 mod view;
 use view::playfield;
-use view::renderable::Renderable;
 
 mod model;
 

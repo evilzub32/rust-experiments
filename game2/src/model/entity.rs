@@ -87,7 +87,7 @@ pub trait Entity: Renderable + KeyListener {
 
     fn update_polygon(&mut self) {
         let mut rot_shape: Vec<Vector2> = Vec::new();
-        let mut pos = self.get_position();
+        let pos = self.get_position();
 
         for point in self.get_original_shape().iter() {
             let mut rnode = point.rotate(self.get_angle_deg());

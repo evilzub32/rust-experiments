@@ -3,8 +3,6 @@ use sdl2::render::Canvas;
 use sdl2::Sdl;
 use sdl2::video::Window;
 
-use crate::model::entity::Entity;
-use crate::model::player::Player;
 use crate::view::renderable::Renderable;
 
 pub struct Renderer {
