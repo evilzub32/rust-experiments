@@ -26,36 +26,16 @@ fn main() {
             Vector2{x: 0., y: -20.},
             Vector2{x: 15., y: 20.},
             Vector2{x: -15., y: 20.},
-        ]);
-
-    let asteroid = Asteroid::new(
-            Size::Large,
-            Vector2{x: 0., y: 0.}
-        );
-
-    // let mut player: Box<dyn Entity> = Box::new(Player::new (
-    //     Vector2 {
-    //         x: playfield.screen_width as f32 / 2.,
-    //         y: playfield.screen_height as f32 / 2.,
-    //     },
-    //     vec![
-    //         Vector2{x: 0., y: -20.},
-    //         Vector2{x: 15., y: 20.},
-    //         Vector2{x: -15., y: 20.},
-    // ]));
-    // let bla = *player;
-    // *player.default_color = Color::YELLOW;
-
-    // let mut asteroid = Asteroid::new(Size::Medium, playfield.screen_width, playfield.screen_height);
+        ]
+    );
 
     let mut entities: Vec<Box<dyn Entity>> = vec![
         Box::new(player),
-        Box::new(asteroid)
+        Box::new(Asteroid::new(Size::Large)),
+        Box::new(Asteroid::new(Size::Large)),
+        Box::new(Asteroid::new(Size::Large)),
+        Box::new(Asteroid::new(Size::Large)),
     ];
-
-    // FIXME: Borrow-Checker does not think this is a good idea...
-    // playfield.renderables.push(&asteroid);
-    // playfield.renderables.push(&player);
 
     while running {
         for e_num in 0..entities.len() {
@@ -68,16 +48,6 @@ fn main() {
                     },
                     Event::KeyDown { keycode: Some(keycode), .. } => {
                         entity.key_down(keycode);
-                        // match keycode {
-                        //     Keycode::Left => player.rotation = Rotation::Counterclockwise,
-                        //     Keycode::Right => player.rotation = Rotation::Clockwise,
-                        //     Keycode::Up => player.thrust = player.max_thrust,
-
-                        //     Keycode::Escape => {
-                        //         running = false;
-                        //     },
-                        //     _ => {}
-                        // }
                         match keycode {
                             Keycode::Escape => {
                                 running = false;
@@ -87,14 +57,6 @@ fn main() {
                     },
                     Event::KeyUp { keycode: Some(keycode), ..} => {
                         entity.key_up(keycode);
-                        // match keycode {
-                        //     Keycode::Left => player.rotation = Rotation::None,
-                        //     Keycode::Right => player.rotation = Rotation::None,
-                        //     Keycode::Up => {
-                        //         player.thrust = 0.;
-                        //     },
-                        //     _ => {}
-                        // }
                     },
                     _ => {}
                 }

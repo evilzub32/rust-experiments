@@ -1,9 +1,11 @@
+use std::ops::Range;
+
 use rand::Rng;
 
 use sdl2::pixels::Color;
 
 use crate::view::renderable::Renderable;
-use super::{lib::Vector2, lib::Point, lib::Rotation, entity::{Entity, KeyListener}};
+use super::{lib::Vector2, entity::{Entity, KeyListener}};
 
 pub enum Size {
     Large,
@@ -41,27 +43,36 @@ pub struct Asteroid {
 }
 
 impl Asteroid {
-    pub fn new(mass: Size, start_position: Vector2) -> Asteroid {
+    pub fn new(mass: Size) -> Asteroid {
+        let mut rng = rand::thread_rng();
         let shape = generate_shape(&mass);
+
         Asteroid {
             mass,
             shape: shape.clone(),
             rotated_poly: shape,
 
-            position: start_position,
+            position: Vector2 { x: rng.gen_range(0.0..1024.0), y: rng.gen_range(0.0..768.0) },
             angle_deg: 0.,
-            turnrate: 0.,
+            turnrate: gen_range_posneg(0.3..1.0),
 
             thrust_vector: Vector2::new(),
             thrust: 0.,
 
-            velocity_vector: Vector2::new(),
+            velocity_vector: Vector2{x: gen_range_posneg(0.4..1.0), y: gen_range_posneg(0.4..1.0)},
 
             default_color: Color::GRAY,
             current_color: Color::GRAY,
             is_colliding: false,
         }
     }
+}
+
+// need this to have a range of positive and negativ values that does not include 0
+fn gen_range_posneg(pos_range: Range<f32>) -> f32 {
+    let mut rng = rand::thread_rng();
+    let num = rng.gen_range(pos_range);
+    num * (if rng.gen::<bool>() { 1.0 } else { -1.0 })
 }
 
 fn generate_shape(mass: &Size) -> Vec<Vector2> {
