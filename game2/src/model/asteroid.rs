@@ -3,7 +3,7 @@ use rand::Rng;
 use sdl2::pixels::Color;
 
 use crate::view::renderable::Renderable;
-use super::{movingobject::MovingObject, lib::Vector2, lib::Point, lib::Rotation};
+use super::{lib::Vector2, lib::Point, lib::Rotation, entity::{Entity, KeyListener}};
 
 pub enum Size {
     Large,
@@ -22,32 +22,45 @@ impl Size {
 }
 pub struct Asteroid {
     pub mass: Size,
-    pub entity: MovingObject,
+    pub shape: Vec<Vector2>,
+    pub rotated_poly: Vec<Vector2>,
+
+    pub position: Vector2,
+    pub angle_deg: f32,
+    pub turnrate: f32,
+
+    pub thrust_vector: Vector2,
+    pub thrust: f32,
+
+    pub velocity_vector: Vector2,
+
+    pub default_color: Color,
+    pub current_color: Color,
+    
+    pub is_colliding: bool,
 }
 
 impl Asteroid {
-    pub fn new(mass: Size, screen_width: u32, screen_height: u32) -> Asteroid {
+    pub fn new(mass: Size, start_position: Vector2) -> Asteroid {
         let shape = generate_shape(&mass);
-        let mut me = Asteroid {
+        Asteroid {
             mass,
-            entity: MovingObject::new (
-                screen_width,
-                screen_height,
-                shape,
-            )
-        };
+            shape: shape.clone(),
+            rotated_poly: shape,
 
-        me.entity.position = Point{x: 0, y: 0};
-        me.entity.default_color = Color::GRAY;
-        me.entity.turnrate = 0.4;
-        me.entity.velocity_vector = Vector2{x: 1., y: 1.};
-        me.entity.rotation = Rotation::Clockwise;
+            position: start_position,
+            angle_deg: 0.,
+            turnrate: 0.,
 
-        me
-    }
+            thrust_vector: Vector2::new(),
+            thrust: 0.,
 
-    pub fn update(&mut self) {
-        self.entity.update()
+            velocity_vector: Vector2::new(),
+
+            default_color: Color::GRAY,
+            current_color: Color::GRAY,
+            is_colliding: false,
+        }
     }
 }
 
@@ -77,12 +90,76 @@ fn generate_shape(mass: &Size) -> Vec<Vector2> {
     shape
 }
 
+impl Entity for Asteroid {
+    fn get_turnrate(&self) -> f32 {
+        self.turnrate
+    }
+
+    fn set_turnrate(&mut self, turnrate: f32) {
+        self.turnrate = turnrate;
+    }
+
+    fn get_thrust(&self) -> f32 {
+        self.thrust
+    }
+
+    fn set_thrust(&mut self, thrust: f32) {
+        self.thrust = thrust;
+    }
+
+    fn get_angle_deg(&self) -> f32 {
+        self.angle_deg
+    }
+
+    fn set_angle_deg(&mut self, angle_deg: f32) {
+        self.angle_deg = angle_deg;
+    }
+
+    fn get_velocity_vector(&self) -> Vector2 {
+        self.velocity_vector
+    }
+
+    fn set_velocity_vector(&mut self, velocity_vector: Vector2) {
+        self.velocity_vector = velocity_vector;
+    }
+
+    fn get_position(&self) -> Vector2 {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Vector2) {
+        self.position = position;
+    }
+
+    fn get_original_shape(&self) -> &Vec<Vector2> {
+        &self.shape
+    }
+
+    fn set_original_shape(&mut self, shape: Vec<Vector2>) {
+        self.shape = shape;
+    }
+
+    fn get_rotated_shape(&self) -> &Vec<Vector2> {
+        &self.rotated_poly
+    }
+
+    fn set_rotated_shape(&mut self, shape: Vec<Vector2>) {
+        self.rotated_poly = shape;
+    }
+}
+
+impl KeyListener for Asteroid {
+    fn key_down(&mut self, keycode: sdl2::keyboard::Keycode) {}
+
+    fn key_up(&mut self, keycode: sdl2::keyboard::Keycode) {}
+}
+
 impl Renderable for Asteroid {
     fn get_polygon(&self) -> &Vec<Vector2> {
-        &self.entity.rotated_poly
+        &self.rotated_poly
     }
 
     fn get_color(&self) -> Color {
-        self.entity.current_color
+        self.current_color
     }
 }

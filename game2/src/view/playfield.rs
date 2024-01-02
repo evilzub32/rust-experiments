@@ -3,7 +3,7 @@ use sdl2::render::Canvas;
 use sdl2::Sdl;
 use sdl2::video::Window;
 
-use crate::view::renderable::Renderable;
+use crate::model::entity::Entity;
 
 pub struct Renderer {
     pub screen_width: u32,
@@ -30,13 +30,13 @@ impl Renderer {
         }
     }
 
-    pub fn render(&mut self, renderable: &Box<impl Renderable>) {
+    pub fn render(&mut self, renderables: &Vec<Box<dyn Entity>>) {
         self.canvas.set_draw_color(Color::RGB(0,0,0));
         self.canvas.clear();
 
-        // for renderable in renderables.iter() {
+        for renderable in renderables.iter() {
             renderable.render(&self.canvas);
-        // }
+        }
 
         self.canvas.present();
     }

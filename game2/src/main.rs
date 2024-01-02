@@ -1,12 +1,12 @@
 use std::time::Duration;
-// use model::asteroid::{Asteroid, Size};
-use model::entity::{Entity, KeyListener};
+use model::asteroid::{Asteroid, Size};
+use model::entity::Entity;
 use model::lib::Vector2;
 use model::player::Player;
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 
 mod view;
+use sdl2::keyboard::Keycode;
 use view::playfield;
 
 mod model;
@@ -17,30 +17,21 @@ fn main() {
     let mut running = true;
     let mut event_queue = playfield.sdl_context.event_pump().unwrap();
 
-    let realplayer = Box::new(Player {
-        position: Vector2 {
+    let player = Player::new (
+        Vector2 {
             x: playfield.screen_width as f32 / 2.,
             y: playfield.screen_height as f32 / 2.,
         },
-        angle_deg: 0.,
-        turnrate: 0.,
-        thrust_vector: Vector2::new(),
-        thrust: 0.,
-        velocity_vector: Vector2::new(),
-        shape: vec![
+        vec![
             Vector2{x: 0., y: -20.},
             Vector2{x: 15., y: 20.},
             Vector2{x: -15., y: 20.},
-        ],
-        rotated_poly: vec![
-            Vector2{x: 0., y: -20.},
-            Vector2{x: 15., y: 20.},
-            Vector2{x: -15., y: 20.},
-        ],
-        default_color: Color::WHITE,
-        current_color: Color::WHITE,
-        is_colliding: false,
-    });
+        ]);
+
+    let asteroid = Asteroid::new(
+            Size::Large,
+            Vector2{x: 0., y: 0.}
+        );
 
     // let mut player: Box<dyn Entity> = Box::new(Player::new (
     //     Vector2 {
@@ -57,15 +48,18 @@ fn main() {
 
     // let mut asteroid = Asteroid::new(Size::Medium, playfield.screen_width, playfield.screen_height);
 
-    let mut entities = vec![realplayer];//, asteroid.entity];
+    let mut entities: Vec<Box<dyn Entity>> = vec![
+        Box::new(player),
+        Box::new(asteroid)
+    ];
 
     // FIXME: Borrow-Checker does not think this is a good idea...
     // playfield.renderables.push(&asteroid);
     // playfield.renderables.push(&player);
 
     while running {
-        for entity in entities.iter_mut() {
-            
+        for e_num in 0..entities.len() {
+            let entity = entities.get_mut(e_num).unwrap();
             // Events will arrive erratically so use state in game-object for smooth handling
             for event in event_queue.poll_iter() {
                 match event {
@@ -84,6 +78,12 @@ fn main() {
                         //     },
                         //     _ => {}
                         // }
+                        match keycode {
+                            Keycode::Escape => {
+                                running = false;
+                            },
+                            _ => {}
+                        }
                     },
                     Event::KeyUp { keycode: Some(keycode), ..} => {
                         entity.key_up(keycode);
@@ -112,9 +112,7 @@ fn main() {
         // }
 
         // check_collisions(vec![Box::new(asteroid), Box::new(player)]);
-        for entity in entities.iter() {
-            playfield.render(entity);
-        }
+        playfield.render(&entities);
 
         // don't know how this works exactly, but SDL2 docs say this is the way to limit to 60 fps
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));

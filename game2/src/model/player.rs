@@ -23,6 +23,24 @@ pub struct Player {
     pub is_colliding: bool,
 }
 
+impl Player {
+    pub fn new(start_position: Vector2, polygon: Vec<Vector2>) -> Self {
+        Self {
+            position: start_position,
+            angle_deg: 0.,
+            turnrate: 0.,
+            thrust_vector: Vector2::new(),
+            thrust: 0.,
+            velocity_vector: Vector2::new(),
+            shape: polygon.clone(),
+            rotated_poly: polygon,
+            default_color: Color::WHITE,
+            current_color: Color::WHITE,
+            is_colliding: false,
+        }
+    }
+}
+
 impl Entity for Player {
     fn get_turnrate(&self) -> f32 {
         self.turnrate
