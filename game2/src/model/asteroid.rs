@@ -22,6 +22,7 @@ impl Size {
         }
     }
 }
+
 pub struct Asteroid {
     pub mass: Size,
     pub shape: Vec<Vector2>,
@@ -76,8 +77,6 @@ fn gen_range_posneg(pos_range: Range<f32>) -> f32 {
 }
 
 fn generate_shape(mass: &Size) -> Vec<Vector2> {
-    let mut rng = rand::thread_rng();
-
     let num_nodes = 8;
     let mut shape:Vec<Vector2> = Vec::new();
 
@@ -92,8 +91,8 @@ fn generate_shape(mass: &Size) -> Vec<Vector2> {
         // radius * sin/cos paints a circle
         // adding random makes circle irregular
         // multiplying random number with random 1/-1 makes it even more irregular
-        let x = radius * rad.sin() + rng.gen_range(10.0..20.0) * (if rng.gen::<bool>() { 1_f32 } else { -1_f32 });
-        let y = radius * rad.cos() + rng.gen_range(10.0..20.0) * (if rng.gen::<bool>() { 1_f32 } else { -1_f32 });
+        let x = radius * rad.sin() + gen_range_posneg(10.0..20.0);
+        let y = radius * rad.cos() + gen_range_posneg(10.0..20.0);
 
         shape.push(Vector2{x, y});
     }
@@ -157,6 +156,32 @@ impl Entity for Asteroid {
     fn set_rotated_shape(&mut self, shape: Vec<Vector2>) {
         self.rotated_poly = shape;
     }
+
+    fn is_colliding(&self) -> bool {
+        self.is_colliding
+    }
+
+    fn set_colliding(&mut self, colliding: bool) {
+        self.is_colliding = colliding;
+    }
+
+    fn get_default_color(&self) -> Color {
+        self.default_color
+    }
+
+    fn set_default_color(&mut self, color: Color) {
+        self.default_color= color;
+    }
+
+    fn get_current_color(&self) -> Color {
+        self.current_color
+    }
+
+    fn set_current_color(&mut self, color: Color) {
+        self.current_color = color;
+    }
+
+    
 }
 
 impl KeyListener for Asteroid {

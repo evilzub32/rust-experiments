@@ -7,6 +7,7 @@ use sdl2::event::Event;
 
 mod view;
 use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
 use view::playfield;
 
 mod model;
@@ -38,8 +39,10 @@ fn main() {
     ];
 
     while running {
-        for e_num in 0..entities.len() {
-            let entity = entities.get_mut(e_num).unwrap();
+        for i in 0..entities.len() {
+            let (left, right) = entities.split_at_mut(i);
+
+            let me = &mut right[0];
             // Events will arrive erratically so use state in game-object for smooth handling
             for event in event_queue.poll_iter() {
                 match event {
@@ -47,7 +50,7 @@ fn main() {
                         running = false;
                     },
                     Event::KeyDown { keycode: Some(keycode), .. } => {
-                        entity.key_down(keycode);
+                        me.key_down(keycode);
                         match keycode {
                             Keycode::Escape => {
                                 running = false;
@@ -56,22 +59,22 @@ fn main() {
                         }
                     },
                     Event::KeyUp { keycode: Some(keycode), ..} => {
-                        entity.key_up(keycode);
+                        me.key_up(keycode);
                     },
                     _ => {}
                 }
             }
 
-            entity.update();
-        }
+            me.set_current_color(me.get_default_color());
+            for other in left {
+                if me.get_bounding_box().collides(&other.get_bounding_box()) {
+                    me.set_current_color(Color::RED);
+                    other.set_current_color(Color::RED);
+                }
+            }
 
-        // if player.get_bounding_box().collides(&asteroid.entity.get_bounding_box()) {
-        //     player.set_colliding(true);
-        //     asteroid.entity.set_colliding(true);
-        // } else {
-        //     player.set_colliding(false);
-        //     asteroid.entity.set_colliding(false);
-        // }
+            me.update();
+        }
 
         // check_collisions(vec![Box::new(asteroid), Box::new(player)]);
         playfield.render(&entities);

@@ -34,8 +34,8 @@ impl Player {
             velocity_vector: Vector2::new(),
             shape: polygon.clone(),
             rotated_poly: polygon,
-            default_color: Color::WHITE,
-            current_color: Color::WHITE,
+            default_color: Color::YELLOW,
+            current_color: Color::YELLOW,
             is_colliding: false,
         }
     }
@@ -96,6 +96,30 @@ impl Entity for Player {
 
     fn set_thrust(&mut self, thrust: f32) {
         self.thrust = thrust;
+    }
+
+    fn is_colliding(&self) -> bool {
+        self.is_colliding
+    }
+
+    fn set_colliding(&mut self, colliding: bool) {
+        self.is_colliding = colliding;
+    }
+
+    fn get_default_color(&self) -> Color {
+        self.default_color
+    }
+
+    fn set_default_color(&mut self, color: Color) {
+        self.default_color = color;
+    }
+
+    fn get_current_color(&self) -> Color {
+        self.current_color
+    }
+
+    fn set_current_color(&mut self, color: Color) {
+        self.current_color = color;
     }
 
     // fn new(start_position: Vector2, polygon: Vec<Vector2>) -> Self {

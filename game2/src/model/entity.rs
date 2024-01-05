@@ -1,8 +1,8 @@
-use sdl2::keyboard::Keycode;
+use sdl2::{keyboard::Keycode, pixels::Color};
 
 use crate::view::renderable::Renderable;
 
-use super::lib::Vector2;
+use super::lib::{Vector2, BoundingBox};
 
 pub trait KeyListener {
     fn key_down(&mut self, keycode: Keycode);
@@ -30,6 +30,15 @@ pub trait Entity: Renderable + KeyListener {
     
     fn get_rotated_shape(&self) -> &Vec<Vector2>;
     fn set_rotated_shape(&mut self, shape: Vec<Vector2>);
+
+    fn is_colliding(&self) -> bool;
+    fn set_colliding(&mut self, colliding: bool);
+
+    fn get_default_color(&self) -> Color;
+    fn set_default_color(&mut self, color: Color);
+
+    fn get_current_color(&self) -> Color;
+    fn set_current_color(&mut self, color: Color);
 
     // TODO: get rid of that!
     fn get_screen_width(&self) -> f32 {
@@ -127,4 +136,28 @@ pub trait Entity: Renderable + KeyListener {
 
         self.update_polygon();
     }
+
+    fn get_bounding_box(&self) -> BoundingBox {
+        let mut bbox = BoundingBox::new();
+
+        for node in self.get_rotated_shape().iter() {
+            if node.x > bbox.x_max{
+                bbox.x_max = node.x;
+            }
+            if node.x < bbox.x_min {
+                bbox.x_min = node.x
+            }
+            if node.y > bbox.y_max {
+                bbox.y_max = node.y
+            }
+            if node.y < bbox.y_min {
+                bbox.y_min = node.y
+            }
+        }
+
+        bbox
+    }
+
+    
+
 }
